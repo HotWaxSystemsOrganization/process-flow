@@ -1,0 +1,274 @@
+= Order Management System Guide
+:author: OFBiz Documentation Team
+:email: docs@ofbiz.apache.org
+:revnumber: 1.0
+:revdate: 2024-03-28
+:toc:
+:toclevels: 3
+:source-highlighter: highlight.js
+:icons: font
+:experimental:
+:imagesdir: images
+:stylesdir: styles
+
+== Introduction
+
+Welcome to the Order Management System Guide! This guide will help you understand how orders are managed in OFBiz, from creation to delivery and returns.
+
+image::order-flow.png[Order Management Flow]
+
+== Chapter 1: Understanding the Basics
+
+=== What is an Order?
+An order in OFBiz represents a customer's request to purchase products or services. Think of it like a shopping list that needs to be processed and delivered.
+
+=== Order Types
+* Sales Order: When a customer buys something
+* Purchase Order: When a store buys from a supplier
+* Return Order: When a customer wants to return something
+
+== Chapter 2: Order Creation Process
+
+=== Step 1: Customer Places Order
+[source,java]
+----
+// Example of order creation service
+service name="createOrder" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="createOrder">
+    <description>Create a new order</description>
+    <attribute name="orderId" type="String" mode="OUT"/>
+    <attribute name="orderTypeId" type="String" mode="IN"/>
+    <attribute name="partyId" type="String" mode="IN"/>
+----
+
+=== Step 2: Order Validation
+[source,java]
+----
+// Example of order validation service
+service name="validateOrder" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="validateOrder">
+    <description>Validate order details</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="valid" type="Boolean" mode="OUT"/>
+----
+
+== Chapter 3: Order Processing Flow
+
+=== Step 1: Order Confirmation
+[source,java]
+----
+// Example of order confirmation service
+service name="confirmOrder" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="confirmOrder">
+    <description>Confirm order details</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="statusId" type="String" mode="OUT"/>
+----
+
+=== Step 2: Inventory Check
+[source,java]
+----
+// Example of inventory check service
+service name="checkInventory" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="checkInventory">
+    <description>Check product availability</description>
+    <attribute name="productId" type="String" mode="IN"/>
+    <attribute name="quantity" type="Integer" mode="IN"/>
+    <attribute name="available" type="Boolean" mode="OUT"/>
+----
+
+=== Step 3: Picking Process
+[source,java]
+----
+// Example of picking service
+service name="createPickList" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="createPickList">
+    <description>Create picking list</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="pickListId" type="String" mode="OUT"/>
+----
+
+=== Step 4: Packing Process
+[source,java]
+----
+// Example of packing service
+service name="createPackingList" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="createPackingList">
+    <description>Create packing list</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="packingListId" type="String" mode="OUT"/>
+----
+
+=== Step 5: Shipping Process
+[source,java]
+----
+// Example of shipping service
+service name="createShipment" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="createShipment">
+    <description>Create shipment</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="shipmentId" type="String" mode="OUT"/>
+----
+
+== Chapter 4: Return Process
+
+=== Step 1: Return Initiation
+[source,java]
+----
+// Example of return creation service
+service name="createReturn" engine="simple"
+    location="component://order/minilang/order/OrderReturnServices.xml"
+    invoke="createReturn">
+    <description>Create return record</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="returnId" type="String" mode="OUT"/>
+----
+
+=== Step 2: Return Processing
+[source,java]
+----
+// Example of return processing service
+service name="processReturn" engine="simple"
+    location="component://order/minilang/order/OrderReturnServices.xml"
+    invoke="processReturn">
+    <description>Process return</description>
+    <attribute name="returnId" type="String" mode="IN"/>
+    <attribute name="statusId" type="String" mode="OUT"/>
+----
+
+== Chapter 5: User Interface Flow
+
+=== Order Entry Screen
+image::order-entry.png[Order Entry Screen]
+
+=== Order Processing Screen
+image::order-processing.png[Order Processing Screen]
+
+=== Return Entry Screen
+image::return-entry.png[Return Entry Screen]
+
+== Chapter 6: Database Structure
+
+=== Order Tables
+[source,sql]
+----
+CREATE TABLE order_header (
+    order_id VARCHAR(20) PRIMARY KEY,
+    order_type_id VARCHAR(20),
+    order_status_id VARCHAR(20),
+    party_id VARCHAR(20),
+    created_date TIMESTAMP
+);
+----
+
+=== Return Tables
+[source,sql]
+----
+CREATE TABLE return_header (
+    return_id VARCHAR(20) PRIMARY KEY,
+    order_id VARCHAR(20),
+    return_status_id VARCHAR(20),
+    created_date TIMESTAMP
+);
+----
+
+== Chapter 7: Security
+
+=== Permission Structure
+[source,java]
+----
+// Example of permission check
+service name="checkOrderPermission" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="checkOrderPermission">
+    <description>Check order permissions</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="userId" type="String" mode="IN"/>
+    <attribute name="hasPermission" type="Boolean" mode="OUT"/>
+----
+
+== Chapter 8: Integration Points
+
+=== Inventory Integration
+image::inventory-integration.png[Inventory Integration]
+
+=== Payment Integration
+image::payment-integration.png[Payment Integration]
+
+=== Shipping Integration
+image::shipping-integration.png[Shipping Integration]
+
+== Chapter 9: Common Use Cases
+
+=== Creating a New Order
+[source,java]
+----
+// Example of complete order creation flow
+service name="createCompleteOrder" engine="simple"
+    location="component://order/minilang/order/OrderServices.xml"
+    invoke="createCompleteOrder">
+    <description>Create complete order</description>
+    <attribute name="customerId" type="String" mode="IN"/>
+    <attribute name="productIds" type="List" mode="IN"/>
+    <attribute name="quantities" type="List" mode="IN"/>
+    <attribute name="orderId" type="String" mode="OUT"/>
+----
+
+=== Processing a Return
+[source,java]
+----
+// Example of complete return processing flow
+service name="processCompleteReturn" engine="simple"
+    location="component://order/minilang/order/OrderReturnServices.xml"
+    invoke="processCompleteReturn">
+    <description>Process complete return</description>
+    <attribute name="orderId" type="String" mode="IN"/>
+    <attribute name="returnReason" type="String" mode="IN"/>
+    <attribute name="returnId" type="String" mode="OUT"/>
+----
+
+== Chapter 10: Troubleshooting
+
+=== Common Issues
+* Order Creation Failures
+* Inventory Issues
+* Payment Problems
+* Shipping Errors
+* Return Processing Issues
+
+=== Solutions
+* Check order validation
+* Verify inventory levels
+* Confirm payment status
+* Validate shipping details
+* Review return authorization
+
+== Appendix
+
+=== Service Reference
+* Order Services
+* Return Services
+* Inventory Services
+* Payment Services
+* Shipping Services
+
+=== Entity Reference
+* Order Entities
+* Return Entities
+* Inventory Entities
+* Payment Entities
+* Shipping Entities
+
+=== UI Component Reference
+* Order Screens
+* Return Screens
+* Inventory Screens
+* Payment Screens
+* Shipping Screens 
